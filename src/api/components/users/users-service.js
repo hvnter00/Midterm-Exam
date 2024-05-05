@@ -1,5 +1,6 @@
 const usersRepository = require('./users-repository');
 const { hashPassword, passwordMatched } = require('../../../utils/password');
+const { User } = require('../../../models');
 
 /**
  * Get list of users
@@ -161,6 +162,80 @@ async function changePassword(userId, password) {
   return true;
 }
 
+/**
+ * No 1 - Pagination, Sort and Filter
+ * (IMPLEMENTASI PAGINATION)
+ * @param {number} pageNumbering Parameter for page number
+ * @param {number} pageSizing Parameter for page size
+ * (IMPLEMENTASI SORT DAN FILTER)
+ * @param {string} fieldNameForSearch
+ * @param {string} keyForSearch
+ * @param {string} fieldNameForSort
+ * @param {string} orderForSort
+ * @returns {promise} Mereturn users list dengan tambahan pagination, sort dan filter
+ */
+
+async function getUsersWithNumbering(
+  pageNumbering,
+  pageSizing,
+  fieldNameForSearch,
+  keyForSearch,
+  fieldNameForSort,
+  orderForSort
+) {
+  try {
+    let query = {}; //setup untuk query
+    if (fieldNameForSearch && keyForSearch) {
+      query[fieldNameForSearch] = { $regex: keyForSearch, $options: 'm' };
+    } //fungsi $regex digunakan untuk search string, ditambahkan dengan penggunaan $options 'm' yang melakukan search di setiap baris, tidak hanya satu saja
+
+    let sort = {}; //jika field kosong, maka sort email secara ascending
+    if (fieldNameForSort === 'name') {
+      sort = {
+        //kondisi jika field tidak kosong
+        name: orderForSort === 'desc' ? -1 : 1,
+      };
+    } else {
+      sort = {
+        //kondisi jika field tidak kosong
+        email: orderForSort === 'desc' ? -1 : 1,
+      };
+    }
+
+    const skip = (pageNumbering - 1) * pageSizing; //mengeluarkan output data sesuai dengan halaman
+    const users = await User.find(query)
+      .sort(sort)
+      .skip(skip)
+      .limit(pageSizing); //melimitasi data yang keluar agar sesuai input user
+    const totalUsers = await User.countDocuments(query); //count jumlah data seluruh user yang ada pada database
+    const totalPages = Math.ceil(totalUsers / pageSizing); //menghitung jumlah halaman pada output untuk page_size = n
+
+    const output = {
+      //Return output sesuai dengan format yang diminta pada soal
+      page_number: pageNumbering,
+      page_size: pageSizing,
+      //menghitung jumlah data yang ada pada page_size = n
+      //sehingga jika total data < input page_size -> count = total data
+      count: users.length,
+      total_pages: totalPages,
+      //memeriksa apakah ada halaman selanjutnya
+      has_previous_page: pageNumbering > 1,
+      //memeriksa apakah ada halaman sebelumnya
+      has_next_page: pageNumbering < totalPages,
+      data: users.map((user) => ({
+        //output data user yang sesuai dengan format, hanya id, name dan email
+        //password tidak dikeluarkan pada output
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      })),
+    };
+    return output;
+  } catch (error) {
+    throw error;
+  }
+}
+
 module.exports = {
   getUsers,
   getUser,
@@ -170,4 +245,5 @@ module.exports = {
   emailIsRegistered,
   checkPassword,
   changePassword,
+  getUsersWithNumbering,
 };

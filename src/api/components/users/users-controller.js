@@ -8,9 +8,23 @@ const { errorResponder, errorTypes } = require('../../../core/errors');
  * @param {object} next - Express route middlewares
  * @returns {object} Response object or pass an error to the next route
  */
+//menambahkan fungsi pagination pada getUsers
 async function getUsers(request, response, next) {
   try {
-    const users = await usersService.getUsers();
+    const pageNumbering = parseInt(request.query.page_number); //menggunakan parseInt untuk konversi string -> integer
+    const pageSizing = parseInt(request.query.page_size);
+    const fieldNameForSearch = request.query.searchField; //setup untuk query pada API
+    const keyForSearch = request.query.searchKey;
+    const fieldNameForSort = request.query.sortField;
+    const orderForSort = request.query.sortOrder;
+    const users = await usersService.getUsersWithNumbering(
+      pageNumbering,
+      pageSizing,
+      fieldNameForSearch,
+      keyForSearch,
+      fieldNameForSort,
+      orderForSort
+    );
     return response.status(200).json(users);
   } catch (error) {
     return next(error);
