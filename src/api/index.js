@@ -9,5 +9,6 @@ module.exports = () => {
   const app = express.Router();
   authentication(app);
   users(app);
+  clientDataRoute(app);
   return app;
 };

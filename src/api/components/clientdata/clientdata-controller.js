@@ -19,13 +19,13 @@ async function inputClientData(request, response, next) {
       );
     }
 
-    const clientDataNew = new clientDataModel({
+    const clientDataNew = new clientData({
       full_name,
       account_number,
       card_type,
     });
-    await clientData.save();
-    return response.status(200).json(clientData);
+    await clientDataNew.save();
+    return response.status(200).json(clientDataNew);
   } catch (error) {
     return next(error);
   }
@@ -54,7 +54,7 @@ async function readClientData(requesyt, response, next) {
  * @param {object} next
  * @returns {object}
  */
-async function upgradeCard(request, respose, next) {
+async function upgradeCard(request, response, next) {
   try {
     const noRek = request.params.account_number;
     const { card_type } = request.body;
