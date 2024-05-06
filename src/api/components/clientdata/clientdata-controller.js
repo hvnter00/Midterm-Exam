@@ -13,6 +13,7 @@ async function inputClientData(request, response, next) {
   try {
     const { full_name, account_number, card_type } = request.body;
     if (account_number.toString().length !== 9) {
+      //Panjang account_number minimal 9 digit
       throw errorResponder(
         errorTypes.VALIDATION_ERROR,
         'Nomor Rekening yang Diinput Tidak Sesuai Ketentuan'
@@ -20,12 +21,13 @@ async function inputClientData(request, response, next) {
     }
 
     const clientDataNew = new clientData({
-      full_name,
-      account_number,
-      card_type,
+      //Setup untuk schema dari create client
+      full_name, //Nama Lengkap
+      account_number, //No Rekening
+      card_type, //Jenis Kartu
     });
     await clientDataNew.save();
-    return response.status(200).json(clientDataNew);
+    return response.status(200).json(client);
   } catch (error) {
     return next(error);
   }
@@ -40,8 +42,8 @@ async function inputClientData(request, response, next) {
  */
 async function readClientData(requesyt, response, next) {
   try {
-    const allClientData = await clientData.find({});
-    return response.status(200).json(allClientData);
+    const allClientData = await clientData.find({}); //Membaca data dari seluruh user yang ada
+    return response.status(200).json(allClientData); //response dengan mengeluarkan semua data yang ada
   } catch (error) {
     return next(error);
   }
@@ -59,11 +61,12 @@ async function upgradeCard(request, response, next) {
     const noRek = request.params.account_number;
     const { card_type } = request.body;
     const upgradedCard = await clientData.findOneAndUpdate(
-      { account_number: noRek },
+      { account_number: noRek }, //Schema untuk update ke card_type baru
       { card_type },
       { new: true }
     );
     if (!upgradedCard) {
+      //Jika data yang diinput tidak sesuai dengan data pada database
       throw errorResponder(
         errorTypes.INVALID_CREDENTIALS,
         'Data Nasabah Invalid'
@@ -90,11 +93,12 @@ async function deleteClientData(request, response, next) {
     });
     if (!deletedData) {
       throw errorResponder(
+        //respon jika data yang diinput tidak sesuai dengan data dalam database
         errorTypes.INVALID_CREDENTIALS,
         'Data Nasabah Invalid'
       );
     }
-    return response.status(200).json({ message: 'Data Nasabah Telah Dihapus' });
+    return response.status(200).json({ message: 'Data Nasabah Telah Dihapus' }); //respon jika data berhasil dihapus
   } catch (error) {
     return next(error);
   }

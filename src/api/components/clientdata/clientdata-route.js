@@ -10,26 +10,26 @@ module.exports = (app) => {
     //route untuk fungsi create
     '/', //endpoint yang digunakan adalah client data
     authenticationMiddleware,
-    clientDataControllers.inputClientData
+    clientDataControllers.inputClientData //menggunakan fungsi inputClientData dari controller
   );
 
   route.get(
     //route untuk fungsi read
     '/', //endpoint yang digunakan mengambil dari client data
     authenticationMiddleware,
-    clientDataControllers.readClientData
+    clientDataControllers.readClientData //menggunakan fungsi readClientData dari controller
   );
 
   route.put(
     //route untuk fungsi update
     '/:account_number', //endpoint client data
     authenticationMiddleware, //ditambah dengan acc number untuk masuk ke data tertentu
-    clientDataControllers.upgradeCard
+    clientDataControllers.upgradeCard //menggunakan fungsi upgradeCard dari controller
   );
 
   route.delete(
     '/:account_number', //endpoint client data
     authenticationMiddleware, //ditambah dengan acc number untuk masuk ke data tertentu
-    clientDataControllers.deleteClientData
+    clientDataControllers.deleteClientData //menggunakan fungsi deleteClientData dari controller
   );
 };
